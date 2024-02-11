@@ -1,11 +1,16 @@
 {
     "version": 2,
-    "builds": [{
-      "src": "dist/main.js",
-      "use": "@vercel/node"
-    }],
-    "routes": [{
-      "src": "/(.*)",
-      "dest": "dist/main.js"
-    }]
+    "builds": [
+      {
+        "src": "hello.py",
+        "use": "@vercel/python",
+        "config": { "maxLambdaSize": "50mb" }
+      }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "hello.py"
+      }
+    ]
   }
