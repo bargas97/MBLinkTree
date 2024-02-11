@@ -3,7 +3,7 @@
 from flask import Blueprint, jsonify, request
 from model import Manager
 from flask import request
-from model import Manager, GroupInfo, Visitor ,Influencer  # Importe os modelos adicionais aqui
+from model import Manager, GroupInfo, Visitor ,Influencer, Link  # Importe os modelos adicionais aqui
 from database import db
 
 api_blueprint = Blueprint('api', __name__)
@@ -35,12 +35,6 @@ def get_groups_infos():
 ##################################################################
 
 ################### MANAGER ##################################
-# @api_blueprint.route('/managers', methods=['GET'])
-# def get_managers():
-#     Manager_list = Manager.query.all()
-#     return jsonify([{"manager_id": managers.manager_id, "user_name": managers.user_name} for managers in Manager_list])
-
-
 
 @api_blueprint.route('/managers', methods=['POST'])
 def create_manager():
@@ -88,14 +82,6 @@ def get_visitors():
 
 ##################################################################
 
-# @api_blueprint.route('/managers', methods=['POST'])
-# def create_manager():
-#     data = request.get_json()
-#     new_manager = Manager(user_name=data['user_name'], password=data['password'])
-#     db.session.add(new_manager)
-#     db.session.commit()
-#     return jsonify({"message": "Manager created successfully"}), 201
-
 #@api_blueprint.route('/visitors', methods=['GET'])
 #def get_visitors():
 #    visitors_list = Visitor.query.all()
@@ -112,3 +98,56 @@ def get_visitors():
 # def api():
 #     data = get_data()
 #     return jsonify(data)
+
+
+
+##############################################################
+## LINKS
+# Create a new link
+@api_blueprint.route('/links', methods=['POST'])
+def create_link():
+    data = request.json
+    new_link = Link(link_name=data['link_name'], url=data['url'], url_reduced=data['url_reduced'],
+                    isvisible=data['isvisible'], influencer_id=data['influencer_id'])
+    db.session.add(new_link)
+    db.session.commit()
+    return jsonify({"message": "Link created successfully."}), 201
+
+# Retrieve all links
+@api_blueprint.route('/links', methods=['GET'])
+def get_links():
+    links = Link.query.all()
+    links_data = [{"link_id": link.link_id, "link_name": link.link_name, "url": link.url,
+                   "url_reduced": link.url_reduced, "isvisible": link.isvisible,
+                   "influencer_id": link.influencer_id, "created_at": link.created_at} for link in links]
+    return jsonify(links_data)
+
+# Retrieve a specific link
+@api_blueprint.route('/links/<int:link_id>', methods=['GET'])
+def get_link(link_id):
+    link = Link.query.get_or_404(link_id)
+    link_data = {"link_id": link.link_id, "link_name": link.link_name, "url": link.url,
+                 "url_reduced": link.url_reduced, "isvisible": link.isvisible,
+                 "influencer_id": link.influencer_id, "created_at": link.created_at}
+    return jsonify(link_data)
+
+# Update an existing link
+@api_blueprint.route('/links/<int:link_id>', methods=['PUT'])
+def update_link(link_id):
+    link = Link.query.get_or_404(link_id)
+    data = request.json
+    link.link_name = data['link_name']
+    link.url = data['url']
+    link.url_reduced = data['url_reduced']
+    link.isvisible = data['isvisible']
+    link.influencer_id = data['influencer_id']
+    db.session.commit()
+    return jsonify({"message": "Link updated successfully."})
+
+# Delete a link
+@api_blueprint.route('/links/<int:link_id>', methods=['DELETE'])
+def delete_link(link_id):
+    link = Link.query.get_or_404(link_id)
+    db.session.delete(link)
+    db.session.commit()
+    return jsonify({"message": "Link deleted successfully."})

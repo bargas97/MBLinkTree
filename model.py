@@ -18,7 +18,7 @@ class Link(db.Model):
     link_name = db.Column(db.String(255), nullable=False)
     url = db.Column(db.String(500),nullable=False)
     url_reduced = db.Column(db.String(100),nullable=False)
-    isVisible = db.Column(db.Boolean)
+    isvisible = db.Column(db.Boolean, default=False)
     influencer_id = db.Column(db.Integer, db.ForeignKey('influencers.influencer_id'))
     created_at = db.Column(db.DateTime)
 
