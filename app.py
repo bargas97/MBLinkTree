@@ -4,8 +4,14 @@ from database import db
 from routes import api_blueprint  # Certifique-se de que este import está correto com base na localização do seu arquivo routes.py
 
 def create_app():
+#banco postgre publicado:
+#url= jdbc:postgresql://silly.db.elephantsql.com:5432/rzojbgsw
+#database:rzojbgsw
+#password:pyyo3P8_lMOtxwYzJsP234BUYx4ovBs4
+    #
+
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:teste123@localhost/postgres'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://rzojbgsw:pyyo3P8_lMOtxwYzJsP234BUYx4ovBs4@silly.db.elephantsql.com:5432/rzojbgsw'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     # Remova a linha onde você tinha `db = SQLAlchemy(app)`
