@@ -123,6 +123,49 @@ def get_visitors():
     Visitor_list = Visitor.query.all()
     return jsonify([{"group_info_id": visitors.visitor_id, "name": visitors.name} for visitors in Visitor_list])
 
+@api_blueprint.route('/visitors', methods=['POST'])
+def add_visitor():
+    data = request.get_json()
+    new_visitor = Visitor(
+        influencer_id=data.get('influencer_id'),
+        referer=data.get('referer', ''),
+        location=data.get('location', ''),
+        link_id=data.get('link_id'),
+        headers=data.get('headers', {})
+    )
+    db.session.add(new_visitor)
+    db.session.commit()
+    return jsonify({"message": "Visitor added successfully", "visitor_id": new_visitor.visitor_id}), 201
+
+@api_blueprint.route('/visitors/<int:visitor_id>', methods=['GET'])
+def get_visitor(visitor_id):
+    visitor = Visitor.query.get(visitor_id)
+    if visitor:
+        return jsonify({
+            "visitor_id": visitor.visitor_id,
+            "influencer_id": visitor.influencer_id,
+            "referer": visitor.referer,
+            "location": visitor.location,
+            "link_id": visitor.link_id,
+            "created_at": visitor.created_at.isoformat(),
+            "headers": visitor.headers
+        })
+    else:
+        return jsonify({"message": "Visitor not found"}), 404
+
+@api_blueprint.route('/visitors/<int:visitor_id>', methods=['PUT'])
+def update_visitor(visitor_id):
+    visitor = Visitor.query.get(visitor_id)
+    if not visitor:
+        return jsonify({"message": "Visitor not found"}), 404
+
+    data = request.get_json()
+    visitor.referer = data.get('referer', visitor.referer)
+    visitor.location = data.get('location', visitor.location)
+    visitor.headers = data.get('headers', visitor.headers)
+    db.session.commit()
+    return jsonify({"message": "Visitor updated successfully"})
+
 ##################################################################
 
 # @api_blueprint.route('/managers', methods=['POST'])
