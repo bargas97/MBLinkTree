@@ -30,13 +30,53 @@ def get_groups_infos():
     group_infos_list = GroupInfo.query.all()
     return jsonify([{"group_info_id": group_infos.group_info_id, "name": group_infos.name} for group_infos in group_infos_list])
 
+
+
 ##################################################################
 
 ################### MANAGER ##################################
+# @api_blueprint.route('/managers', methods=['GET'])
+# def get_managers():
+#     Manager_list = Manager.query.all()
+#     return jsonify([{"manager_id": managers.manager_id, "user_name": managers.user_name} for managers in Manager_list])
+
+
+
+@api_blueprint.route('/managers', methods=['POST'])
+def create_manager():
+    data = request.json
+    new_manager = Manager(user_name=data['user_name'], password=data['password'])
+    db.session.add(new_manager)
+    db.session.commit()
+    return jsonify({"message": "Manager created successfully."}), 201
+
 @api_blueprint.route('/managers', methods=['GET'])
 def get_managers():
-    Manager_list = Manager.query.all()
-    return jsonify([{"manager_id": managers.manager_id, "user_name": managers.user_name} for managers in Manager_list])
+    managers = Manager.query.all()
+    managers_data = [{"manager_id": manager.manager_id, "user_name": manager.user_name} for manager in managers]
+    return jsonify(managers_data)
+
+@api_blueprint.route('/managers/<int:manager_id>', methods=['GET'])
+def get_manager(manager_id):
+    manager = Manager.query.get_or_404(manager_id)
+    manager_data = {"manager_id": manager.manager_id, "user_name": manager.user_name}
+    return jsonify(manager_data)
+
+@api_blueprint.route('/managers/<int:manager_id>', methods=['PUT'])
+def update_manager(manager_id):
+    manager = Manager.query.get_or_404(manager_id)
+    data = request.json
+    manager.user_name = data['user_name']
+    manager.password = data['password']
+    db.session.commit()
+    return jsonify({"message": "Manager updated successfully."})
+
+@api_blueprint.route('/managers/<int:manager_id>', methods=['DELETE'])
+def delete_manager(manager_id):
+    manager = Manager.query.get_or_404(manager_id)
+    db.session.delete(manager)
+    db.session.commit()
+    return jsonify({"message": "Manager deleted successfully."})
 
 ##################################################################
 
@@ -48,13 +88,13 @@ def get_visitors():
 
 ##################################################################
 
-@api_blueprint.route('/managers', methods=['POST'])
-def create_manager():
-    data = request.get_json()
-    new_manager = Manager(user_name=data['user_name'], password=data['password'])
-    db.session.add(new_manager)
-    db.session.commit()
-    return jsonify({"message": "Manager created successfully"}), 201
+# @api_blueprint.route('/managers', methods=['POST'])
+# def create_manager():
+#     data = request.get_json()
+#     new_manager = Manager(user_name=data['user_name'], password=data['password'])
+#     db.session.add(new_manager)
+#     db.session.commit()
+#     return jsonify({"message": "Manager created successfully"}), 201
 
 #@api_blueprint.route('/visitors', methods=['GET'])
 #def get_visitors():
