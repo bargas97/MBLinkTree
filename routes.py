@@ -7,6 +7,7 @@ from model import Manager, GroupInfo, Visitor ,Influencer, Link  # Importe os mo
 from database import db
 from sqlalchemy.exc import SQLAlchemyError  # Import SQLAlchemyError
 from werkzeug.exceptions import BadRequest  # Import for catching bad requests
+import hashlib
 
 api_blueprint = Blueprint('api', __name__)
 
@@ -129,11 +130,21 @@ def get_visitors():
 @api_blueprint.route('/links', methods=['POST'])
 def create_link():
     data = request.json
-    new_link = Link(link_name=data['link_name'], url=data['url'], url_reduced=data['url_reduced'],
-                    isvisible=data['isvisible'], influencer_id=data['influencer_id'])
+    if 'url_reduced' in data and data['url_reduced']:  # If url_reduced is provided
+        existing_link = Link.query.filter_by(url_reduced=data['url_reduced']).first()
+        if existing_link:
+            return jsonify({"error": "Provided url_reduced is already in use."}), 400
+        else:
+            new_link = Link(link_name=data['link_name'], url=data['url'], url_reduced=data['url_reduced'],
+                            isvisible=data.get('isvisible', True), influencer_id=data['influencer_id'])
+    else:  # If url_reduced is not provided, generate a reduced link using hash
+        hash_value = hashlib.sha256(data['url'].encode() + data['link_name'].encode()+ str(data['influencer_id']).encode()).hexdigest()[:8]  # Using hash for simplicity
+        new_link = Link(link_name=data['link_name'], url=data['url'], url_reduced=hash_value,
+                        isvisible=data.get('isvisible', True), influencer_id=data['influencer_id'])
+    
     db.session.add(new_link)
     db.session.commit()
-    return jsonify({"message": "Link created successfully."}), 201
+    return jsonify({"message": "Link created successfully.", "url_reduced": new_link.url_reduced}), 201
 
 # Retrieve all links
 @api_blueprint.route('/links', methods=['GET'])

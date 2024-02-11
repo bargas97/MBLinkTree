@@ -21,7 +21,7 @@ class Link(db.Model):
     url_reduced = db.Column(db.String(100),nullable=False)
     isvisible = db.Column(db.Boolean, default=False)
     influencer_id = db.Column(db.Integer, db.ForeignKey('influencers.influencer_id'))
-    created_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime , default=datetime.utcnow)
 
     visitors = db.relationship('Visitor', backref='link', lazy=True)
     # Adicione mais modelos conforme necessário
