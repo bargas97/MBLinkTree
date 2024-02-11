@@ -16,6 +16,9 @@ class Link(db.Model):
     __tablename__ = 'links'
     link_id = db.Column(db.Integer, primary_key=True)
     link_name = db.Column(db.String(255), nullable=False)
+    url = db.Column(db.String(500),nullable=False)
+    url_reduced = db.Column(db.String(100),nullable=False)
+    isVisible = db.Column(db.Boolean)
     influencer_id = db.Column(db.Integer, db.ForeignKey('influencers.influencer_id'))
     created_at = db.Column(db.DateTime)
 
