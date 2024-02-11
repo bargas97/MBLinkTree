@@ -36,15 +36,30 @@ def create_influencer():
         # Log this error
         return jsonify({"error": "An unexpected error occurred."}), 500
 
+@api_blueprint.route('/influencers/<int:influencer_id>', methods=['PUT'])
+def update_influencer(influencer_id):
+    data = request.get_json()  # Get data from request body
+    try:
+        influencer = Influencer.query.get_or_404(influencer_id)  # Get influencer by ID or return 404
+        influencer.name = data.get('name', influencer.name)  # Update the name if provided
+        db.session.commit()  # Commit the changes
+        return jsonify({"message": "Influencer updated successfully", "influencer_id": influencer.influencer_id})
+    except SQLAlchemyError as e:  # Catch any SQLAlchemy errors
+        db.session.rollback()  # Rollback the session to a clean state
+        return jsonify({"DB error": str(e)}), 500
+    except Exception as e:  # Catching other errors
+        # Log this error
+        return jsonify({"error": "An unexpected error occurred."}), 500
+    
+@api_blueprint.route('/influencers/<int:influencer_id>', methods=['DELETE'])
+def delete_influencer(influencer_id):
 
-#@api_blueprint.route('/influencers', methods=['POST'])
-#def create_influencer():
-#    data = request.get_json()
-#    new_influencer = Influencer(name=data['name'], follower_count=data['follower_count'])  # supondo que o JSON recebido tenha 'name' e 'follower_count'
-#    db.session.add(new_influencer)
-#    db.session.commit()
-#   return jsonify({"message": "Influencer created successfully"}), 201
-##################################################################
+        influencer = Influencer.query.get_or_404(influencer_id)  # Get influencer by ID or return 404
+        db.session.delete(influencer)  # Delete the influencer from the session
+        db.session.commit()  # Commit the transaction
+        return jsonify({"message": "Influencer deleted successfully"}), 500
+
+
 
 ################### GROUP INFOS ##################################
 @api_blueprint.route('/groupinfos', methods=['GET'])
