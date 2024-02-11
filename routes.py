@@ -37,15 +37,30 @@ def create_influencer():
         # Log this error
         return jsonify({"error": "An unexpected error occurred."}), 500
 
+@api_blueprint.route('/influencers/<int:influencer_id>', methods=['PUT'])
+def update_influencer(influencer_id):
+    data = request.get_json()  # Get data from request body
+    try:
+        influencer = Influencer.query.get_or_404(influencer_id)  # Get influencer by ID or return 404
+        influencer.name = data.get('name', influencer.name)  # Update the name if provided
+        db.session.commit()  # Commit the changes
+        return jsonify({"message": "Influencer updated successfully", "influencer_id": influencer.influencer_id})
+    except SQLAlchemyError as e:  # Catch any SQLAlchemy errors
+        db.session.rollback()  # Rollback the session to a clean state
+        return jsonify({"DB error": str(e)}), 500
+    except Exception as e:  # Catching other errors
+        # Log this error
+        return jsonify({"error": "An unexpected error occurred."}), 500
+    
+@api_blueprint.route('/influencers/<int:influencer_id>', methods=['DELETE'])
+def delete_influencer(influencer_id):
 
-#@api_blueprint.route('/influencers', methods=['POST'])
-#def create_influencer():
-#    data = request.get_json()
-#    new_influencer = Influencer(name=data['name'], follower_count=data['follower_count'])  # supondo que o JSON recebido tenha 'name' e 'follower_count'
-#    db.session.add(new_influencer)
-#    db.session.commit()
-#   return jsonify({"message": "Influencer created successfully"}), 201
-##################################################################
+        influencer = Influencer.query.get_or_404(influencer_id)  # Get influencer by ID or return 404
+        db.session.delete(influencer)  # Delete the influencer from the session
+        db.session.commit()  # Commit the transaction
+        return jsonify({"message": "Influencer deleted successfully"}), 500
+
+
 
 ################### GROUP INFOS ##################################
 @api_blueprint.route('/groupinfos', methods=['GET'])
@@ -102,6 +117,49 @@ def delete_manager(manager_id):
 def get_visitors():
     Visitor_list = Visitor.query.all()
     return jsonify([{"group_info_id": visitors.visitor_id, "name": visitors.name} for visitors in Visitor_list])
+
+@api_blueprint.route('/visitors', methods=['POST'])
+def add_visitor():
+    data = request.get_json()
+    new_visitor = Visitor(
+        influencer_id=data.get('influencer_id'),
+        referer=data.get('referer', ''),
+        location=data.get('location', ''),
+        link_id=data.get('link_id'),
+        headers=data.get('headers', {})
+    )
+    db.session.add(new_visitor)
+    db.session.commit()
+    return jsonify({"message": "Visitor added successfully", "visitor_id": new_visitor.visitor_id}), 201
+
+@api_blueprint.route('/visitors/<int:visitor_id>', methods=['GET'])
+def get_visitor(visitor_id):
+    visitor = Visitor.query.get(visitor_id)
+    if visitor:
+        return jsonify({
+            "visitor_id": visitor.visitor_id,
+            "influencer_id": visitor.influencer_id,
+            "referer": visitor.referer,
+            "location": visitor.location,
+            "link_id": visitor.link_id,
+            "created_at": visitor.created_at.isoformat(),
+            "headers": visitor.headers
+        })
+    else:
+        return jsonify({"message": "Visitor not found"}), 404
+
+@api_blueprint.route('/visitors/<int:visitor_id>', methods=['PUT'])
+def update_visitor(visitor_id):
+    visitor = Visitor.query.get(visitor_id)
+    if not visitor:
+        return jsonify({"message": "Visitor not found"}), 404
+
+    data = request.get_json()
+    visitor.referer = data.get('referer', visitor.referer)
+    visitor.location = data.get('location', visitor.location)
+    visitor.headers = data.get('headers', visitor.headers)
+    db.session.commit()
+    return jsonify({"message": "Visitor updated successfully"})
 
 ##################################################################
 
