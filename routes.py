@@ -12,20 +12,20 @@ api_blueprint = Blueprint('api', __name__)
 @api_blueprint.route('/influencers', methods=['GET'])
 def get_influencers():
     influencers_list = Influencer.query.all()
-    return jsonify([{"influencer_id": influencer.influencer_id, "name": influencer.name} for influencer in influencers_list])
+    return jsonify([{"influencer_id": influencer.influencer_id, "name": influencer.name,"url": influencer.url} for influencer in influencers_list])
 
 
-#@api_blueprint.route('/influencers', methods=['POST'])
-#def create_influencer():
-#    data = request.get_json()
-#    new_influencer = Influencer(name=data['name'], follower_count=data['follower_count'])  # supondo que o JSON recebido tenha 'name' e 'follower_count'
-#    db.session.add(new_influencer)
-#    db.session.commit()
-#   return jsonify({"message": "Influencer created successfully"}), 201
+@api_blueprint.route('/influencers', methods=['POST'])
+def create_influencer():
+    data = request.get_json()
+    new_influencer = Influencer(influencer_id=data['influencer_id'],name=data['name'], url=data['url'])  # supondo que o JSON recebido tenha 'name' e 'follower_count'
+    db.session.add(new_influencer)
+    db.session.commit()
+    return jsonify({"message": "Influencer created successfully"}), 201
 ##################################################################
 
 ################### GROUP INFOS ##################################
-@api_blueprint.route('/groupinfos', methods=['GET'])
+@api_blueprint.route('/groupinfos', methods=['GET']) 
 def get_groups_infos():
     group_infos_list = GroupInfo.query.all()
     return jsonify([{"group_info_id": group_infos.group_info_id, "name": group_infos.name} for group_infos in group_infos_list])

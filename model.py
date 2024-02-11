@@ -7,6 +7,7 @@ class Influencer(db.Model):
     influencer_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
     created_at = db.Column(db.DateTime)
+    url = db.Column(db.String(255))
 
     links = db.relationship('Link', backref='influencer', lazy=True)
     visitors = db.relationship('Visitor', backref='influencer', lazy=True)
