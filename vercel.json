@@ -1,16 +1,5 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "hello.py",
-        "use": "@vercel/python",
-        "config": { "maxLambdaSize": "50mb" }
-      }
-    ],
-    "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "hello.py"
-      }
+    "rewrites": [
+      { "source": "/(.*)", "destination": "/api/index" }
     ]
   }
