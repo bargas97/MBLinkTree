@@ -53,12 +53,17 @@ def update_influencer(influencer_id):
     
 @api_blueprint.route('/influencers/<int:influencer_id>', methods=['DELETE'])
 def delete_influencer(influencer_id):
-
+    try:
         influencer = Influencer.query.get_or_404(influencer_id)  # Get influencer by ID or return 404
         db.session.delete(influencer)  # Delete the influencer from the session
         db.session.commit()  # Commit the transaction
-        return jsonify({"message": "Influencer deleted successfully"}), 500
-
+        return jsonify({"message": "Influencer deleted successfully"}), 200
+    except SQLAlchemyError as e:  # Catch any SQLAlchemy errors
+        db.session.rollback()  # Rollback the session to a clean state
+        return jsonify({"DB error": str(e)}), 500
+    except Exception as e:  # Catching other errors
+        # Log this error
+        return jsonify({"error": "An unexpected error occurred."}), 500
 
 
 ################### GROUP INFOS ##################################
