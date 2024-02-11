@@ -5,6 +5,8 @@ from model import Manager
 from flask import request
 from model import Manager, GroupInfo, Visitor ,Influencer  # Importe os modelos adicionais aqui
 from database import db
+from sqlalchemy.exc import SQLAlchemyError  # Import SQLAlchemyError
+from werkzeug.exceptions import BadRequest  # Import for catching bad requests
 
 api_blueprint = Blueprint('api', __name__)
 
@@ -13,6 +15,26 @@ api_blueprint = Blueprint('api', __name__)
 def get_influencers():
     influencers_list = Influencer.query.all()
     return jsonify([{"influencer_id": influencer.influencer_id, "name": influencer.name} for influencer in influencers_list])
+
+@api_blueprint.route('/influencers', methods=['POST'])
+def create_influencer():
+    data = request.get_json()
+    try:
+        if not data or 'name' not in data or 'url' not in data:  # Basic validation to check if name exists
+            raise BadRequest('Missing fields in request data')
+        new_influencer = Influencer(name=data['name'],url=data['url'])
+        db.session.add(new_influencer)
+        db.session.commit()
+        return jsonify({"message": "Influencer created successfully", "influencer_id": new_influencer.influencer_id}), 201
+    except SQLAlchemyError as e:  # Catch any SQLAlchemy errors
+        db.session.rollback()  # Rollback the session to a clean state
+        return jsonify({"DB error": str(e)}), 500
+    except BadRequest as e:
+        # Log the bad request error here
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:  # Catching other errors
+        # Log this error
+        return jsonify({"error": "An unexpected error occurred."}), 500
 
 
 #@api_blueprint.route('/influencers', methods=['POST'])
